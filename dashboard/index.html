@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Anomaly Detection Platform</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 to-black text-white min-h-screen p-6">
+
+<h1 class="text-3xl font-bold mb-6">AI-Based Anomaly Detection Dashboard</h1>
+
+<!-- ================= KPI SECTION ================= -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+
+    <div class="glass-card">
+        <p class="text-gray-400">Active Patients</p>
+        <h2 id="activePatients" class="text-3xl font-bold text-green-400">0</h2>
+    </div>
+
+    <div class="glass-card">
+        <p class="text-gray-400">High Risk Alerts</p>
+        <h2 id="highAlerts" class="text-3xl font-bold text-red-500">0</h2>
+    </div>
+
+    <div class="glass-card">
+        <p class="text-gray-400">Avg Anomaly Score</p>
+        <h2 id="avgScore" class="text-3xl font-bold text-purple-400">0</h2>
+    </div>
+
+    <div class="glass-card">
+        <p class="text-gray-400">Last Alert Time</p>
+        <h2 id="lastAlert" class="text-xl font-semibold text-gray-300">-</h2>
+    </div>
+
+</div>
+
+<!-- ================= CHART GRID ================= -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+
+    <div class="glass-card"><canvas id="severityChart"></canvas></div>
+    <div class="glass-card"><canvas id="anomalyChart"></canvas></div>
+    <div class="glass-card"><canvas id="heartChart"></canvas></div>
+    <div class="glass-card"><canvas id="spo2Chart"></canvas></div>
+    <div class="glass-card"><canvas id="tempChart"></canvas></div>
+    <div class="glass-card"><canvas id="bpChart"></canvas></div>
+
+</div>
+
+<!-- ================= TABLE ================= -->
+<div class="glass-card overflow-x-auto">
+    <h2 class="text-xl font-semibold mb-4">Latest Records</h2>
+    <table class="min-w-full text-sm">
+        <thead class="text-gray-400 border-b border-gray-700">
+            <tr>
+                <th class="p-2 text-left">Timestamp</th>
+                <th class="p-2">Patient</th>
+                <th class="p-2">Score</th>
+                <th class="p-2">Severity</th>
+                <th class="p-2">HR</th>
+                <th class="p-2">SpO2</th>
+                <th class="p-2">Temp</th>
+                <th class="p-2">BP</th>
+            </tr>
+        </thead>
+        <tbody id="recordsTable"></tbody>
+    </table>
+</div>
+
+<script>
+
+const API = "http://127.0.0.1:8000/api";
+
+let severityChart, anomalyChart, heartChart, spo2Chart, tempChart, bpChart;
+
+// ---------------- INIT CHARTS ----------------
+function initCharts(){
+
+    severityChart = new Chart(document.getElementById("severityChart"), {
+        type: "doughnut",
+        data: {
+            labels: ["HIGH","MEDIUM","LOW"],
+            datasets: [{
+                data: [0,0,0],
+                backgroundColor: ["#ef4444","#facc15","#22c55e"]
+            }]
+        }
+    });
+
+    anomalyChart = new Chart(document.getElementById("anomalyChart"), {
+        type: "line",
+        data: { labels:[], datasets:[{ label:"Anomaly Score", data:[], borderColor:"#a855f7"}] }
+    });
+
+    heartChart = new Chart(document.getElementById("heartChart"), {
+        type:"line",
+        data:{ labels:[], datasets:[{ label:"Heart Rate", data:[], borderColor:"#22c55e"}]}
+    });
+
+    spo2Chart = new Chart(document.getElementById("spo2Chart"), {
+        type:"line",
+        data:{ labels:[], datasets:[{ label:"SpO2", data:[], borderColor:"#38bdf8"}]}
+    });
+
+    tempChart = new Chart(document.getElementById("tempChart"), {
+        type:"bar",
+        data:{ labels:[], datasets:[{ label:"Temperature", data:[], backgroundColor:"#f97316"}]}
+    });
+
+    bpChart = new Chart(document.getElementById("bpChart"), {
+        type:"line",
+        data:{ labels:[], datasets:[
+            { label:"Blood Pressure", data:[], borderColor:"#f87171"}
+        ]}
+    });
+}
+
+// ---------------- LOAD METRICS ----------------
+async function loadMetrics(){
+    const res = await fetch(`${API}/metrics`);
+    const data = await res.json();
+
+    document.getElementById("activePatients").innerText = data.active_patients;
+    document.getElementById("highAlerts").innerText = data.high_alerts;
+    document.getElementById("avgScore").innerText = Number(data.avg_anomaly_score).toFixed(3);
+    document.getElementById("lastAlert").innerText = data.last_alert_time || "-";
+}
+
+// ---------------- SEVERITY ----------------
+async function loadSeverity(){
+    const res = await fetch(`${API}/severity-distribution`);
+    const data = await res.json();
+
+    severityChart.data.datasets[0].data = [data.HIGH, data.MEDIUM, data.LOW];
+    severityChart.update();
+}
+
+// ---------------- TRENDS ----------------
+async function loadTrends(){
+
+    const vitalsRes = await fetch(`${API}/trend/vitals`);
+    const vitals = await vitalsRes.json();
+
+    const times = vitals.map(v => v.timestamp);
+
+    heartChart.data.labels = times;
+    heartChart.data.datasets[0].data = vitals.map(v => v.heart_rate);
+    heartChart.update();
+
+    spo2Chart.data.labels = times;
+    spo2Chart.data.datasets[0].data = vitals.map(v => v.oxygen_level);
+    spo2Chart.update();
+
+    tempChart.data.labels = times;
+    tempChart.data.datasets[0].data = vitals.map(v => v.temperature);
+    tempChart.update();
+
+    // FIXED BP (single numeric value)
+    bpChart.data.labels = times;
+    bpChart.data.datasets[0].data = vitals.map(v => v.blood_pressure);
+    bpChart.update();
+
+    const anomalyRes = await fetch(`${API}/trend/anomaly`);
+    const anomaly = await anomalyRes.json();
+
+    anomalyChart.data.labels = anomaly.map(a => a.timestamp);
+    anomalyChart.data.datasets[0].data = anomaly.map(a => a.anomaly_score);
+    anomalyChart.update();
+}
+
+// ---------------- TABLE ----------------
+async function loadTable(){
+
+    const res = await fetch(`${API}/anomalies`);
+    const data = await res.json();
+
+    const table = document.getElementById("recordsTable");
+    table.innerHTML = "";
+
+    data.slice(0,20).forEach(r => {
+
+        const badgeColor =
+            r.severity === "HIGH" ? "bg-red-500" :
+            r.severity === "MEDIUM" ? "bg-yellow-500" :
+            "bg-green-500";
+
+        table.innerHTML += `
+        <tr class="border-b border-gray-800">
+            <td class="p-2">${r.timestamp}</td>
+            <td class="p-2 text-center">${r.patient_id}</td>
+            <td class="p-2 text-center">${Number(r.anomaly_score).toFixed(3)}</td>
+            <td class="p-2 text-center">
+                <span class="px-2 py-1 rounded-full text-xs ${badgeColor}">
+                    ${r.severity}
+                </span>
+            </td>
+            <td class="p-2 text-center">${r.heart_rate}</td>
+            <td class="p-2 text-center">${r.oxygen_level}</td>
+            <td class="p-2 text-center">${r.temperature}</td>
+            <td class="p-2 text-center">${r.blood_pressure}</td>
+        </tr>`;
+    });
+}
+
+// ---------------- AUTO REFRESH ----------------
+async function refreshAll(){
+    await loadMetrics();
+    await loadSeverity();
+    await loadTrends();
+    await loadTable();
+}
+
+initCharts();
+refreshAll();
+setInterval(refreshAll, 5000);
+
+</script>
+
+<style>
+.glass-card{
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+</style>
+
+</body>
+</html>

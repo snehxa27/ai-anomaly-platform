@@ -1,0 +1,11 @@
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+flask
+psycopg2-binary
+tensorflow
+joblib
+kafka-python
+python-dotenv
