@@ -1,194 +1,106 @@
-
-
-# 📄 README.md
-
-```markdown
 # 🏥 AI-Driven Healthcare Anomaly Detection System
 
-A real-time AI-powered healthcare monitoring platform that detects abnormal patterns in patient vital signs and generates early risk alerts using Machine Learning.
+Real-time AI-powered healthcare monitoring platform that detects abnormal patient vital patterns and generates automated health risk alerts using Machine Learning.
 
 ---
 
-## 📌 Project Overview
+## 📌 Overview
 
-The AI-Driven Healthcare Anomaly Detection System is an end-to-end real-time monitoring and decision-support platform designed to detect abnormal physiological patterns in patient vitals.
+This system continuously monitors:
 
-Unlike traditional static threshold-based systems, this platform uses Machine Learning models such as Isolation Forest to dynamically identify anomalies in live healthcare data streams.
+- Heart Rate  
+- SpO₂  
+- Temperature  
+- Blood Pressure  
 
-The system integrates:
+Using **Isolation Forest**, it classifies patient conditions into:
 
-- Real-time data streaming
-- Machine learning anomaly detection
-- Severity classification (LOW, MEDIUM, HIGH)
-- PostgreSQL database storage
-- Flask-based interactive dashboard
-- Automated email alert system
-- Docker-based deployment
+- 🟢 LOW  
+- 🟡 MEDIUM  
+- 🔴 HIGH  
+
+Integrated with Kafka streaming, PostgreSQL storage, dashboard visualization, and automated email alerts.
 
 ---
 
 ## 🚀 Features
 
-- 📡 Real-time patient vital monitoring
-- 🤖 ML-based anomaly detection (Isolation Forest)
-- ⚠ Severity classification (LOW / MEDIUM / HIGH)
-- 📊 Live dashboard visualization
-- 📧 Automatic email alerts for critical cases
-- 🗄 Persistent database storage (PostgreSQL)
-- 🐳 Docker containerization support
-
----
-
-## 🏗 System Architecture
-
-Data Flow:
-
-Patient Vitals → Producer → Kafka → Consumer → ML Model →  
-Severity Classification → Database → Dashboard → Email Alerts
+- Real-time data streaming (Kafka)
+- ML-based anomaly detection
+- Severity classification
+- Live dashboard
+- Email alerts for critical cases
+- PostgreSQL storage
+- Dockerized deployment
 
 ---
 
 ## 🛠 Tech Stack
 
-| Component | Technology |
-|------------|------------|
-| Programming Language | Python |
-| Backend Framework | Flask |
-| Machine Learning | Scikit-learn |
-| Streaming | Apache Kafka |
-| Database | PostgreSQL |
-| Visualization | HTML, CSS, JavaScript |
-| Containerization | Docker |
-| Email Alerts | SMTP |
+- **Backend:** Python, Flask  
+- **ML:** Scikit-learn (Isolation Forest)  
+- **Streaming:** Apache Kafka  
+- **Database:** PostgreSQL  
+- **Frontend:** HTML, CSS, JS  
+- **Deployment:** Docker  
 
 ---
 
 ## 📂 Project Structure
+## 📂 Project Structure
 
-```
-
+```text
 ai-anomaly-platform/
 │
-├── backend/           # Flask backend
-├── dashboard/         # Dashboard UI
-├── streaming/         # Kafka producer & consumer
-├── training/          # Model training modules
-├── models/            # Saved ML models
-├── database/          # DB configuration
-├── alerts/            # Email alert logic
-├── utils/             # Utility functions
+├── backend/            # Flask backend services
+│   ├── app.py
+│   └── main.py
 │
-├── docker-compose.yml
-├── requirements.txt
-└── README.md
-
+├── dashboard/          # Frontend dashboard (UI)
+│   └── index.html
+│
+├── streaming/          # Kafka producer & consumer
+│   ├── producer.py
+│   └── consumer.py
+│
+├── training/           # Model training & preprocessing
+├── models/             # Saved ML models (.pkl files)
+├── database/           # PostgreSQL configuration
+├── alerts/             # Email alert system
+├── utils/              # Helper utilities
+│
+├── docker-compose.yml  # Container orchestration
+├── requirements.txt    # Python dependencies
+└── README.md           # Project documentation
 ```
 
 ---
 
-## ⚙ Installation & Setup
+## ⚙ Setup
 
-### 1️⃣ Clone Repository
-
-```
-
-git clone [https://github.com/snehxa27/ai-anomaly-platform.git](https://github.com/snehxa27/ai-anomaly-platform.git)
+```bash
+git clone https://github.com/snehxa27/ai-anomaly-platform.git
 cd ai-anomaly-platform
-
-```
-
----
-
-### 2️⃣ Create Virtual Environment
-
-```
-
 python -m venv venv
-source venv/bin/activate   # Mac/Linux
-
-```
-
----
-
-### 3️⃣ Install Dependencies
-
-```
-
+source venv/bin/activate
 pip install -r requirements.txt
-
-```
-
----
-
-### 4️⃣ Configure Environment Variables
-
-Create a `.env` file:
-
-```
-
-EMAIL_USER=your_email
-EMAIL_PASSWORD=your_password
-DATABASE_URL=your_db_url
-
-```
-
----
-
-### 5️⃣ Run with Docker (Recommended)
-
-```
-
 docker-compose up --build
 
-```
+📊 Results
 
-OR run services manually.
+Detected abnormal heart rate spikes
 
----
+Identified low oxygen levels
 
-## 📊 Results
+Classified LOW / MEDIUM / HIGH severity
 
-The system successfully:
+Triggered email alerts
 
-- Detected abnormal heart rate spikes
-- Identified low oxygen saturation events
-- Classified anomalies into severity levels
-- Triggered automatic email alerts for HIGH severity
-- Displayed real-time visualization on dashboard
-- Stored all records in PostgreSQL
+Stored records in PostgreSQL
 
----
+Real-time dashboard updates
 
-## 📈 Example High-Risk Detection
+👩‍💻 Author
 
-- Heart Rate: 134 bpm  
-- SpO₂: 88%  
-- Temperature: 38.4°C  
-- Blood Pressure: 158 mmHg  
-- Severity: HIGH  
-
----
-
-## 🔍 Performance
-
-- Average processing time per record: ~1 second
-- Real-time dashboard updates
-- Stable streaming performance
-
----
-
-## 🔮 Future Scope
-
-- Deep learning Autoencoder integration
-- Cloud deployment (AWS / GCP)
-- Multi-patient monitoring
-- Mobile application integration
-- Integration with hospital EMR systems
-
----
-
-## 👩‍💻 Author
-
-Sneha Karande  
-Bachelor’s in Data Science  
-
+Sneha Karande
+B.Tech Data Science
